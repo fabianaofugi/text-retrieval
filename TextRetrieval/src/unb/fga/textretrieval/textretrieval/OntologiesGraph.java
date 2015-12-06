@@ -1,6 +1,7 @@
 package unb.fga.textretrieval.textretrieval;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -14,9 +15,9 @@ import org.openrdf.model.URI;
 import org.openrdf.model.vocabulary.RDF;
 
 import slib.sglib.algo.graph.accessor.GraphAccessor;
-import slib.sglib.algo.graph.utils.GraphActionExecutor;
 import slib.sglib.algo.graph.utils.GAction;
 import slib.sglib.algo.graph.utils.GActionType;
+import slib.sglib.algo.graph.utils.GraphActionExecutor;
 import slib.sglib.io.conf.GDataConf;
 import slib.sglib.io.loader.GraphLoaderGeneric;
 import slib.sglib.io.util.GFormat;
@@ -25,10 +26,10 @@ import slib.sglib.model.impl.graph.elements.Edge;
 import slib.sglib.model.impl.graph.memory.GraphMemory;
 import slib.sglib.model.impl.repo.URIFactoryMemory;
 import slib.sglib.model.repo.URIFactory;
+import slib.sml.sm.core.engine.SM_Engine;
 import slib.sml.sm.core.metrics.ic.utils.IC_Conf_Corpus;
 import slib.sml.sm.core.metrics.ic.utils.ICconf;
 import slib.sml.sm.core.utils.SMConstants;
-import slib.sml.sm.core.engine.SM_Engine;
 import slib.sml.sm.core.utils.SMconf;
 import slib.utils.ex.SLIB_Ex_Critic;
 import slib.utils.ex.SLIB_Exception;
@@ -106,10 +107,9 @@ public class OntologiesGraph {
         try {
             // open the file
             articlesFile = new Scanner(new File(path));
-        } catch (Exception e) {
-            articlesFile.close();
-            LOGGER.severe(e.getMessage());
-            throw new SLIB_Exception(e);
+        } catch (FileNotFoundException fnfe) {
+            LOGGER.severe(fnfe.getMessage());
+            throw new SLIB_Exception(fnfe);
         }
 
         String line;
