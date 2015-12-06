@@ -4,7 +4,6 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import slib.sglib.model.graph.G;
-import slib.utils.ex.SLIB_Ex_Critic;
 import slib.utils.ex.SLIB_Exception;
 import unb.fga.textretrieval.textretrieval.OntologiesGraph;
 
@@ -18,16 +17,13 @@ public class OntologiesGraphTest {
 			int unexpectedResult = 0;
 			
 			Assert.assertNotEquals(unexpectedResult, result);
-		} catch(SLIB_Ex_Critic e) {
+		} catch(SLIB_Exception e) {
 			e.printStackTrace();
 		}
 	}
 	
-	@Test(expected = SLIB_Ex_Critic.class)
-	public void testPopulateGraphFailed() {
-		try {
+	@Test(expected = SLIB_Exception.class)
+	public void testPopulateGraphFailed() throws SLIB_Exception {
 			OntologiesGraph.loadOntologies("obo-rdf");
-		} catch(SLIB_Ex_Critic e) {
-		}
 	}
 }
