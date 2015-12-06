@@ -1,10 +1,9 @@
 package unb.fga.textretrieval.textretrieval;
 
-	import java.io.File;
+import java.io.File;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
-import java.util.Random;
 import java.util.Scanner;
 import java.util.Set;
 import java.util.TreeMap;
@@ -41,7 +40,11 @@ public class OntologiesGraph {
     private static Map<String, Set<URI>> articles = new HashMap<String, Set<URI>>();
     private static URIFactory factory = URIFactoryMemory.getSingleton();
 
-    private final static Logger LOGGER = Logger.getLogger(Main.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(Main.class.getName());
+    
+    private OntologiesGraph() {
+        
+    }
 
     /**
      * Populates the graph with the ontologies and removes the instances.
@@ -51,14 +54,14 @@ public class OntologiesGraph {
      * @throws SLIB_Exception
      */
     public static void loadOntologies(String dirPath) throws SLIB_Exception {
-        LOGGER.setLevel(Level.SEVERE);
+        LOGGER.setLevel(Level.ALL);
 
         File ontologiesDir = new File(dirPath);
-        String ontologies[] = ontologiesDir.list();
+        String[] ontologies = ontologiesDir.list();
 
-        URI graph_uri = factory.getURI("http://purl.obolibrary.org/obo/");
+        URI graphUri = factory.getURI("http://purl.obolibrary.org/obo/");
 
-        graph = new GraphMemory(graph_uri);
+        graph = new GraphMemory(graphUri);
 
         if (ontologies != null) {
             for (String ontology : ontologies) {
@@ -72,10 +75,7 @@ public class OntologiesGraph {
 
             }
         } else
-            System.err.println(dirPath + " is not a directory.");
-
-        // General information about the graph
-        // System.out.println(graph.toString());
+            LOGGER.severe(dirPath + " is not a directory.");
 
         // We create a vertex corresponding to the virtual root
         // and we add it to the graph
@@ -87,16 +87,8 @@ public class OntologiesGraph {
         rooting.addParameter("root_uri", virtualRoot.stringValue());
         GraphActionExecutor.applyAction(factory, rooting, graph);
 
-        // System.out.println(graph.toString());
-
-        // int nbVertices = graph.getV().size();
-        // System.out.println("Nb vertices : " + nbVertices);
-
         Set<URI> instances = new HashSet<URI>();
         instances = GraphAccessor.getInstances(graph);
-
-        // System.out.println("----- Instances to be removed: " +
-        // instances.size());
 
         graph.removeV(instances);
     }
@@ -115,11 +107,13 @@ public class OntologiesGraph {
             // open the file
             articlesFile = new Scanner(new File(path));
         } catch (Exception e) {
+            articlesFile.close();
             LOGGER.severe(e.getMessage());
             throw new SLIB_Exception(e);
         }
 
-        String line, splitline[], splitClass[];
+        String line;
+        String[] splitline, splitClass;
         String id, className, classId;
         URI idUri;
         Set<URI> classUriSet = new HashSet<URI>();
@@ -127,7 +121,8 @@ public class OntologiesGraph {
         while (articlesFile.hasNextLine()) {
             line = articlesFile.nextLine();
             if (line.isEmpty()) {
-                System.err.println("Error at reading articles file");
+                articlesFile.close();
+                LOGGER.severe("Error at reading articles file");
                 return;
             }
 
@@ -151,7 +146,7 @@ public class OntologiesGraph {
                 graph.addE(e);
 
             }
-            if (classUriSet.isEmpty()) {
+            if (!classUriSet.isEmpty()) {
                 articles.put(id, classUriSet);
             }
             classUriSet = new HashSet<URI>();
@@ -167,7 +162,7 @@ public class OntologiesGraph {
      *            Number of classes the query must have.
      * @return a set of URIs
      */
-    public static Set<URI> generateQuery(int numberOfClasses) {
+    public static Set<URI> generateQuery() {
         Set<URI> concepts = new HashSet<URI>();
         concepts.add(factory.getURI("http://purl.obolibrary.org/obo/EHDA_1355"));
         concepts.add(factory.getURI("http://purl.obolibrary.org/obo/EHDA_6488"));
@@ -175,18 +170,12 @@ public class OntologiesGraph {
         concepts.add(factory.getURI("http://purl.obolibrary.org/obo/HP_0001263"));
                     
         Set<URI> classes = GraphAccessor.getClasses(graph);
-        URI classesArray[] = new URI[classes.size()];
+        URI[] classesArray = new URI[classes.size()];
         classes.toArray(classesArray);
-
-//      Random randomIndex = new Random();
-//      for (int i = 0; i < numberOfClasses; i++){
-//        int randomInt = randomIndex.nextInt(classes.size());
-//        concepts.add(classesArray[randomInt]);
-//      }
         
-        System.out.println("------Set to be compared with the articles: ");
+        LOGGER.info("------Set to be compared with the articles: ");
         for (URI u : concepts) {
-            System.out.println(u.toString());
+            LOGGER.info(u.toString());
         }
         
         return concepts;
@@ -200,7 +189,7 @@ public class OntologiesGraph {
      *         value, in ascending order.
      * @throws SLIB_Ex_Critic
      */
-    public static TreeMap<Double, String> computeSimilarity(Set<URI> query) throws SLIB_Ex_Critic {
+    public static Map<Double, String> computeSimilarity(Set<URI> query) throws SLIB_Ex_Critic {
         ICconf icConf = new IC_Conf_Corpus("Resnik", SMConstants.FLAG_IC_ANNOT_RESNIK_1995);
 
         // Then we define the Semantic measure configuration
@@ -210,7 +199,7 @@ public class OntologiesGraph {
         SM_Engine engine = new SM_Engine(graph);
 
         double sim;
-        TreeMap<Double, String> similarityArticles = new TreeMap<Double, String>();
+        Map<Double, String> similarityArticles = new TreeMap<Double, String>();
         for (Map.Entry<String, Set<URI>> e : articles.entrySet()) {
             sim = engine.computeGroupwiseStandaloneSim(smConf, query, e.getValue());
             similarityArticles.put(sim, e.getKey());
