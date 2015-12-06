@@ -168,25 +168,26 @@ public class OntologiesGraph {
      */
     public static Set<URI> generateQuery(int numberOfClasses) {
         Set<URI> concepts = new HashSet<URI>();
-        // concepts.add(factory.getURI("http://purl.obolibrary.org/obo/FMA_9670"));
-        // concepts.add(factory.getURI("http://purl.obolibrary.org/obo/FMA_13478"));
-        // concepts.add(factory.getURI("http://purl.obolibrary.org/obo/FMA_63083"));
-
+        concepts.add(factory.getURI("http://purl.obolibrary.org/obo/EHDA_1355"));
+        concepts.add(factory.getURI("http://purl.obolibrary.org/obo/EHDA_6488"));
+        concepts.add(factory.getURI("http://purl.obolibrary.org/obo/EHDA_10251"));
+        concepts.add(factory.getURI("http://purl.obolibrary.org/obo/HP_0001263"));
+                    
         Set<URI> classes = GraphAccessor.getClasses(graph);
         URI classesArray[] = new URI[classes.size()];
         classes.toArray(classesArray);
 
-        Random randomIndex = new Random();
-        for (int i = 0; i < numberOfClasses; i++) {
-            int randomInt = randomIndex.nextInt(classes.size());
-            concepts.add(classesArray[randomInt]);
-        }
-
+//      Random randomIndex = new Random();
+//      for (int i = 0; i < numberOfClasses; i++){
+//        int randomInt = randomIndex.nextInt(classes.size());
+//        concepts.add(classesArray[randomInt]);
+//      }
+        
         System.out.println("------Set to be compared with the articles: ");
         for (URI u : concepts) {
             System.out.println(u.toString());
         }
-
+        
         return concepts;
     }
 
