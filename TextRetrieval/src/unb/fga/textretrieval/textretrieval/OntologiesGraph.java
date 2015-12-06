@@ -36,7 +36,8 @@ import slib.utils.ex.SLIB_Exception;
 
 public class OntologiesGraph {
 
-    private static G graph;
+    public static G graph;
+    
     private static Map<String, Set<URI>> articles = new HashMap<String, Set<URI>>();
     private static URIFactory factory = URIFactoryMemory.getSingleton();
 
