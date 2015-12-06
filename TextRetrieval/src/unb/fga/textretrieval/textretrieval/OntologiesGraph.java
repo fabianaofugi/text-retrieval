@@ -1,3 +1,4 @@
+package unb.fga.textretrieval.textretrieval;
 
 	import java.io.File;
 import java.util.HashMap;

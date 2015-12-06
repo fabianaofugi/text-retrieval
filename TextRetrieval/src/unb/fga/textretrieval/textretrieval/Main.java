@@ -1,3 +1,4 @@
+package unb.fga.textretrieval.textretrieval;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.logging.Level;
