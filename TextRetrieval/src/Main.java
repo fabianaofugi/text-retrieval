@@ -1,5 +1,7 @@
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import slib.utils.ex.SLIB_Ex_Critic;
 import slib.utils.ex.SLIB_Exception;
@@ -7,21 +9,25 @@ import slib.utils.ex.SLIB_Exception;
 
 public class Main {
 
+    private final static Logger LOGGER = Logger.getLogger(Main.class.getName());
 	/**
 	 * @param args
+	 * @throws Exception 
 	 */
-	public static void main(String[] args) {
-		
+	public static void main(String[] args) throws SLIB_Exception {
+	    LOGGER.setLevel(Level.SEVERE);
+	    
 		long initialTime = System.currentTimeMillis();
 		try {
-			OntologiesGraph.loadOntologies("obo-rdf");
+			OntologiesGraph.loadOntologies("obo-rdf_");
 		} catch (SLIB_Exception e) {
-			e.printStackTrace();
+			LOGGER.severe(e.getMessage());
+			throw new SLIB_Exception(e);
 		}
 
 		long loadTime = System.currentTimeMillis();
 		
-		OntologiesGraph.instantiateArticles("pmc-tagged.txt");
+		OntologiesGraph.instantiateArticles("articles.txt");
 		TreeMap<Double, String> similarityArticles = new TreeMap<Double, String>();
 		
 		long instantiateTime = System.currentTimeMillis();
@@ -29,7 +35,8 @@ public class Main {
 		try {
 			similarityArticles = OntologiesGraph.computeSimilarity(OntologiesGraph.generateQuery(100));
 		} catch (SLIB_Ex_Critic e1) {
-			e1.printStackTrace();
+		    LOGGER.severe(e1.getMessage());
+		    throw new SLIB_Exception(e1);
 		}
 		
 		long computationTime = System.currentTimeMillis();
@@ -45,13 +52,13 @@ public class Main {
 		
 		long finalTime = System.currentTimeMillis();
 		
-		double totalLoadTime = (((loadTime - initialTime)/1000)/60);
-		double totalInstantiateTime = (((instantiateTime - loadTime)/1000)/60);
-		double totalComputationTime = (((computationTime - instantiateTime)/1000)/60);
-		double totalTime = (((finalTime - initialTime)/1000)/60);
-		System.out.println("---- Loading time: " + totalLoadTime + "min");
-		System.out.println("---- Instatiation time: " + totalInstantiateTime + "min");
-		System.out.println("---- Computation time: " + totalComputationTime + "min");
+		double totalLoadTime = loadTime - initialTime;
+		double totalInstantiateTime = instantiateTime - loadTime;
+		double totalComputationTime = computationTime - instantiateTime;
+		double totalTime = finalTime - initialTime;
+		System.out.println("---- Loading time: " + totalLoadTime + "ms");
+		System.out.println("---- Instatiation time: " + totalInstantiateTime + "ms");
+		System.out.println("---- Computation time: " + totalComputationTime + "ms");
 		System.out.println("---- time: " + totalTime + "min");
 	}
 
